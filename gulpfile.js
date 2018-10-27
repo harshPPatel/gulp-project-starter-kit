@@ -45,9 +45,9 @@ gulp.task('pug', function() {
 
 //copy pug file to source folder
 gulp.task('pugCopy', function () {
-  gulp.src('source/pug/*.html')
+  return gulp.src('source/pug/*.html')
     .pipe(plumber())
-    .pipe(gulp.dest('source/'));
+    .pipe(gulp.dest(htmlDestination));
 })
 
 // html minify and copy to build folder
