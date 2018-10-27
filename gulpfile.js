@@ -12,17 +12,27 @@ var gulp          = require('gulp'),
 
 var htmlSource = 'source/*.html',
     htmlDestination = 'build/',
+    jekyllHtmlSource = 'website/*.html',
     cssVendorSource = 'source/css/*.css',
     sassSource = 'source/sass/**/*.sass',
     cssDestination = 'build/assets/css/',
-    jsVendorSource = 'source/js/vendors/*.js'
-    jsAppSource = 'source/js/*.js'
-    jsDestination = 'build/assets/js/'
+    jsVendorSource = 'source/js/vendors/*.js',
+    jsAppSource = 'source/js/*.js',
+    jsDestination = 'build/assets/js/',
     imgSource = 'source/img/*',
     imgDestination = 'build/assets/img/',
     faviconSource = 'source/favicon/*',
     faviconDestination = 'build/assets/favicon/';
 
+//Copy Jekyll File to source folder
+gulp.task('jekyll', function() {
+    gulp.src(jekyllHtmlSource)
+     .pipe(plumber())
+     .pipe(htmlmim({
+        collapseWhitespace: true
+     }))
+     .pipe(gulp.dest('source/'));
+})
 
 // html minify and copy to build folder
 gulp.task('html', function() {
@@ -109,6 +119,7 @@ gulp.task('watch', function () {
     notify: false
   });
 
+  gulp.watch(jekyllHtmlSource, ['jekyll']);
   gulp.watch(htmlSource, ['html']);
   gulp.watch(cssVendorSource, ['minify-css']);
   gulp.watch(jsVendorSource, ['vendorjs']);
@@ -127,4 +138,14 @@ gulp.task('watch', function () {
 
 
 // Gulp Default Task
-gulp.task('default', ['html', 'minify-css', 'vendorjs', 'appjs', 'img-minify', 'favicon', 'sass', 'watch']);
+gulp.task('default', ['jekyll', 'html', 'minify-css', 'vendorjs', 'appjs', 'img-minify', 'favicon', 'sass', 'watch']);
+
+
+//To use Jekyll,
+// open project in cmd/terminal
+// run 'jekyll new website'
+// it will create website folder(it is already ignored in .gitignore)
+// now open another cmd window and go to website directory and run jekyll there
+// now open previous window and now run gulp here and this will run your jekyll with Gulp
+// as in this gulp, jekyll is only building html files,it is not compiling sass files, it will not take too much space.
+// But this set up is not suitable for blogs it is only for that if you want to create 4 or 5 html pages
