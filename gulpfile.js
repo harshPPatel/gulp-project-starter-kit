@@ -8,11 +8,13 @@ var gulp          = require('gulp'),
     imagemin      = require('gulp-imagemin'),
     autoprefixer  = require('gulp-autoprefixer'),
     plumber       = require('gulp-plumber'),
-    browserSync   = require('browser-sync');
+    browserSync   = require('browser-sync'),
+    pug           = require('gulp-pug');
 
 var htmlSource = 'source/*.html',
     htmlDestination = 'build/',
     jekyllHtmlSource = 'website/*.html',
+    pugSource = 'source/pug/**/*.pug',
     cssVendorSource = 'source/css/*.css',
     sassSource = 'source/sass/**/*.sass',
     cssDestination = 'build/assets/css/',
@@ -28,10 +30,24 @@ var htmlSource = 'source/*.html',
 gulp.task('jekyll', function() {
     gulp.src(jekyllHtmlSource)
      .pipe(plumber())
-     .pipe(htmlmim({
+     .pipe(htmlmin({
         collapseWhitespace: true
      }))
      .pipe(gulp.dest('source/'));
+})
+
+//pug Task
+gulp.task('pug', function() {
+  return gulp.src(pugSource)
+    .pipe(pug())
+    .pipe(gulp.dest('source/pug'));
+})
+
+//copy pug file to source folder
+gulp.task('pugCopy', function () {
+  gulp.src('source/pug/*.html')
+    .pipe(plumber())
+    .pipe(gulp.dest('source/'));
 })
 
 // html minify and copy to build folder
@@ -120,6 +136,8 @@ gulp.task('watch', function () {
   });
 
   gulp.watch(jekyllHtmlSource, ['jekyll']);
+  gulp.watch(pugSource, ['pug']);
+  gulp.watch('source/pug/*.html', ['pugCopy']);
   gulp.watch(htmlSource, ['html']);
   gulp.watch(cssVendorSource, ['minify-css']);
   gulp.watch(jsVendorSource, ['vendorjs']);
@@ -138,7 +156,7 @@ gulp.task('watch', function () {
 
 
 // Gulp Default Task
-gulp.task('default', ['jekyll', 'html', 'minify-css', 'vendorjs', 'appjs', 'img-minify', 'favicon', 'sass', 'watch']);
+gulp.task('default', ['jekyll', 'pug', 'pugCopy', 'html', 'minify-css', 'vendorjs', 'appjs', 'img-minify', 'favicon', 'sass', 'watch']);
 
 
 //To use Jekyll,
