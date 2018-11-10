@@ -1,1 +1,2 @@
-# Meow-Coin
+# gulp-project-starter-kit
+#
