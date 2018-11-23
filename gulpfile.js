@@ -1,4 +1,8 @@
-var gulp          = require('gulp'),
+var { parallel,
+      src,
+      dest,
+      task,
+      watch }     = require('gulp'),
     htmlmin       = require('gulp-htmlmin'),
     cleanCSS      = require('gulp-clean-css'),
     uglify        = require('gulp-uglify'),
@@ -11,58 +15,37 @@ var gulp          = require('gulp'),
     browserSync   = require('browser-sync'),
     pug           = require('gulp-pug');
 
-var htmlSource = 'source/*.html',
-    htmlDestination = 'build/',
-    jekyllHtmlSource = 'website/*.html',
-    pugSource = 'source/pug/**/*.pug',
-    cssVendorSource = 'source/css/*.css',
-    sassSource = 'source/sass/**/*.sass',
-    cssDestination = 'build/assets/css/',
-    jsVendorSource = 'source/js/vendors/*.js',
-    jsAppSource = 'source/js/*.js',
-    jsDestination = 'build/assets/js/',
-    imgSource = 'source/img/*',
-    imgDestination = 'build/assets/img/',
-    faviconSource = 'source/favicon/*',
-    faviconDestination = 'build/assets/favicon/';
+var pugSource       = 'source/pug/*.pug',
+    sassSource      = 'source/sass/**/*.sass',
+    jsVendorSource  = 'source/js/vendors/*.js'
+    jsMainSource    = 'source/js/*.js'
+    imageSource     = 'source/img/*'
+    faviconSource   = 'source/favicon/*',
+    jsonSource      = 'source/json/*.json';
 
-//Copy Jekyll File to source folder
-gulp.task('jekyll', function() {
-    gulp.src(jekyllHtmlSource)
-     .pipe(plumber())
-     .pipe(htmlmin({
-        collapseWhitespace: true
-     }))
-     .pipe(gulp.dest('source/'));
-})
+var htmlDestination     = 'build/',
+    cssDestination      = 'build/assets/css/',
+    jsDestination       = 'build/assets/js/'
+    imageDestination    = 'build/assets/img/'
+    faviconDestination  = 'build/assets/favicon/',
+    jsonDestination     = 'build/assets/json/';
 
-//pug Task
-gulp.task('pug', function() {
-  return gulp.src(pugSource)
+task('html', function(cb) {
+  return src(pugSource)
     .pipe(pug())
-    .pipe(gulp.dest('source/pug'));
-})
-
-//copy pug file to source folder
-gulp.task('pugCopy', function () {
-  return gulp.src('source/pug/*.html')
-    .pipe(plumber())
-    .pipe(gulp.dest(htmlDestination));
-})
-
-// html minify and copy to build folder
-gulp.task('html', function() {
-  gulp.src(htmlSource)
     .pipe(plumber())
     .pipe(htmlmin({
       collapseWhitespace: true
     }))
-    .pipe(gulp.dest(htmlDestination))
+    .pipe(dest(htmlDestination));
+  cb();
 })
 
-//Minify Vendor Css and Concat them
-gulp.task('minify-css', () => {
-  return gulp.src(cssVendorSource)
+task('sass', function(cb) {
+  return src(sassSource)
+    .pipe(sass({
+      outputStyle: 'compressed'
+    }))
     .pipe(plumber())
     .pipe(autoprefixer({
       browsers: ["cover 99.5%"]
@@ -70,64 +53,58 @@ gulp.task('minify-css', () => {
     .pipe(cleanCSS({
       compatibility: 'ie8'
     }))
-    .pipe(concat('vendors.css'))
-    .pipe(gulp.dest(cssDestination));
+    .pipe(concat('styles.css'))
+    .pipe(dest(cssDestination))
+  cb();
 })
 
-//sass
-gulp.task('sass', function() {
-  return gulp.src(sassSource)
-    .pipe(plumber())
-    .pipe(sass({
-      outputStyle: 'compressed'
-    }))
-    .pipe(concat('style.css'))
-    .pipe(gulp.dest(cssDestination))
-})
-
-//vendor js
-gulp.task('vendorjs', function (cb) {
+task('vendorJS', function(cb) {
   pump([
-        gulp.src(jsVendorSource),
-        plumber(),
-        concat('vendors.js'),
-        uglify(),
-        gulp.dest(jsDestination)
+      src(jsVendorSource),
+      plumber(),
+      concat('vendors.js'),
+      uglify(),
+      dest(jsDestination)
     ],
     cb
   );
-});
+})
 
-//app js
-gulp.task('appjs', function (cb) {
+task('appJS', function(cb) {
   pump([
-        gulp.src(jsAppSource),
-        plumber(),
-        uglify(),
-        gulp.dest(jsDestination)
-      ],
+      src(jsMainSource),
+      plumber(),
+      concat('app.js'),
+      uglify(),
+      dest(jsDestination)
+    ],
     cb
   );
-});
-
-//image minify
-gulp.task('img-minify', () => {
-  gulp.src(imgSource)
-    .pipe(imagemin())
-    .pipe(plumber())
-    .pipe(gulp.dest(imgDestination));
 })
 
-//favicon minify
-gulp.task('favicon', () => {
-  gulp.src(faviconSource)
+task('image', function(cb) {
+  return src(imageSource)
     .pipe(imagemin())
     .pipe(plumber())
-    .pipe(gulp.dest(faviconDestination));
+    .pipe(dest(imageDestination))
+  cb();
 })
 
-//watch task
-gulp.task('watch', function () {
+task('favicon', function(cb) {
+  return src(faviconSource)
+    .pipe(plumber())
+    .pipe(dest(faviconDestination))
+  cb();
+})
+
+task('json', function(cb) {
+  return src(jsonSource)
+    .pipe(plumber())
+    .pipe(dest(jsonDestination))
+  cb();
+})
+
+task('watch', function(cb) {
   browserSync.init({
     server: {
       baseDir: './build'
@@ -135,35 +112,29 @@ gulp.task('watch', function () {
     notify: false
   });
 
-  gulp.watch(jekyllHtmlSource, ['jekyll']);
-  gulp.watch(pugSource, ['pug']);
-  gulp.watch('source/pug/*.html', ['pugCopy']);
-  gulp.watch(htmlSource, ['html']);
-  gulp.watch(cssVendorSource, ['minify-css']);
-  gulp.watch(jsVendorSource, ['vendorjs']);
-  gulp.watch(jsAppSource, ['appjs']);
-  gulp.watch(imgSource, ['img-minify']);
-  gulp.watch(faviconSource, ['favicon']);
-  gulp.watch(sassSource, ['sass']);
-  gulp.watch([
+  watch('source/pug/**/*.pug', task('html'));
+  watch(sassSource, task('sass'));
+  watch(jsVendorSource, task('vendorJS'));
+  watch(jsMainSource, task('appJS'));
+  watch(imageSource, task('image'));
+  watch(faviconSource, task('favicon'));
+  watch(jsonSource, task('json'));
+  watch([
     'build/*.html',
     'build/assets/css/*.css',
     'build/assets/js/*.js',
-    'build/assets/img/*',
+    '.build/assets/img/*',
     'build/assets/favicon/*',
+    'build/assets/json/*.json'
   ]).on('change', browserSync.reload);
+  cb();
 })
 
-
-// Gulp Default Task
-gulp.task('default', ['jekyll', 'pug', 'pugCopy', 'html', 'minify-css', 'vendorjs', 'appjs', 'img-minify', 'favicon', 'sass', 'watch']);
-
-
-//To use Jekyll,
-// open project in cmd/terminal
-// run 'jekyll new website'
-// it will create website folder(it is already ignored in .gitignore)
-// now open another cmd window and go to website directory and run jekyll there
-// now open previous window and now run gulp here and this will run your jekyll with Gulp
-// as in this gulp, jekyll is only building html files,it is not compiling sass files, it will not take too much space.
-// But this set up is not suitable for blogs it is only for that if you want to create 4 or 5 html pages
+exports.default = parallel( task('html'), 
+                            task('sass'), 
+                            task('vendorJS'), 
+                            task('appJS'),
+                            task('image'),
+                            task('favicon'),
+                            task('json'),
+                            task('watch'));
