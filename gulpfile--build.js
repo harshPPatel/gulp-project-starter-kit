@@ -4,11 +4,15 @@ const {
   dest,
   watch
 } = require('gulp');
+
 const htmlmin = require('gulp-htmlmin');
+const imagemin = require('gulp-imagemin');
 
 const htmlSource = './source/*.html';
+const imageSource = './source/images/*';
 
 const htmlDestination = './public/';
+const imageDestination = './public/assets/images/';
 
 const htmlTask = (cb) => {
   return src(htmlSource)
@@ -23,4 +27,11 @@ const htmlTask = (cb) => {
   cb();
 }
 
-exports.build = series(htmlTask);
+const imageTask = (cb) => {
+  return src(imageSource)
+    .pipe(imagemin())
+    .pipe(dest(imageDestination));
+  cb();
+};
+
+exports.build = series(htmlTask, imageTask);

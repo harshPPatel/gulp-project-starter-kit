@@ -34,13 +34,21 @@ const {
 
 
 const htmlSource = './source/*.html';
+const imageSource = './source/images/*';
 
 const htmlDestination = './public/';
+const imageDestination = './public/assets/images/';
 
 const htmlTask = (cb) => {
   return src(htmlSource)
     .pipe(dest(htmlDestination));
   cb();
-}
+};
 
-exports.default = series(htmlTask);
+const imageTask = (cb) => {
+  return src(imageSource)
+    .pipe(dest(imageDestination));
+  cb();
+};
+
+exports.default = series(htmlTask, imageTask);
