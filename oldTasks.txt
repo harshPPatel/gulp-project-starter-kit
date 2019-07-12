@@ -1,0 +1,99 @@
+
+// task('sass', function (cb) {
+//   return src(sassSource)
+//     .pipe(sass({
+//       outputStyle: 'compressed'
+//     }))
+//     .pipe(plumber())
+//     .pipe(autoprefixer({
+//       browsers: ["cover 99.5%"]
+//     }))
+//     .pipe(cleanCSS({
+//       compatibility: 'ie8'
+//     }))
+//     .pipe(concat('styles.css'))
+//     .pipe(dest(cssDestination))
+//   cb();
+// })
+
+// task('vendorJS', function (cb) {
+//   pump([
+//       src(jsVendorSource),
+//       plumber(),
+//       concat('vendors.js'),
+//       uglify(),
+//       dest(jsDestination)
+//     ],
+//     cb
+//   );
+// })
+
+// task('appJS', function (cb) {
+//   pump([
+//       src(jsMainSource),
+//       plumber(),
+//       concat('app.js'),
+//       uglify(),
+//       dest(jsDestination)
+//     ],
+//     cb
+//   );
+// })
+
+// task('image', function (cb) {
+//   return src(imageSource)
+//     .pipe(imagemin())
+//     .pipe(plumber())
+//     .pipe(dest(imageDestination))
+//   cb();
+// })
+
+// task('favicon', function (cb) {
+//   return src(faviconSource)
+//     .pipe(plumber())
+//     .pipe(dest(faviconDestination))
+//   cb();
+// })
+
+// task('json', function (cb) {
+//   return src(jsonSource)
+//     .pipe(plumber())
+//     .pipe(dest(jsonDestination))
+//   cb();
+// })
+
+// task('watch', function (cb) {
+//   browserSync.init({
+//     server: {
+//       baseDir: './build'
+//     },
+//     notify: false
+//   });
+
+//   watch('source/pug/**/*.pug', task('html'));
+//   watch(sassSource, task('sass'));
+//   watch(jsVendorSource, task('vendorJS'));
+//   watch(jsMainSource, task('appJS'));
+//   watch(imageSource, task('image'));
+//   watch(faviconSource, task('favicon'));
+//   watch(jsonSource, task('json'));
+//   watch([
+//     'build/*.html',
+//     'build/assets/css/*.css',
+//     'build/assets/js/*.js',
+//     '.build/assets/img/*',
+//     'build/assets/favicon/*',
+//     'build/assets/json/*.json'
+//   ]).on('change', browserSync.reload);
+//   cb();
+// })
+
+// exports.default = parallel(task('html'),
+//   task('sass'),
+//   task('vendorJS'),
+//   task('appJS'),
+//   task('image'),
+//   task('favicon'),
+//   task('json'),
+//   task('watch'));
+
