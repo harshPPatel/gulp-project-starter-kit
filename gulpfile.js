@@ -5,6 +5,8 @@ const {
   watch
 } = require('gulp');
 
+const concat = require('gulp-concat');
+
 // htmlmin = require('gulp-htmlmin'),
 // cleanCSS = require('gulp-clean-css'),
 // uglify = require('gulp-uglify'),
@@ -35,9 +37,11 @@ const {
 
 const htmlSource = './source/*.html';
 const imageSource = './source/images/*';
+const javaScriptSource = './source/js/*.js';
 
 const htmlDestination = './public/';
-const imageDestination = './public/assets/images/';
+const imageDestination = './public/images/';
+const javaScriptDestination = './public/js/';
 
 const htmlTask = (cb) => {
   return src(htmlSource)
@@ -51,4 +55,11 @@ const imageTask = (cb) => {
   cb();
 };
 
-exports.default = series(htmlTask, imageTask);
+const javaScriptTask = (cb) => {
+  return src(javaScriptSource)
+    .pipe(concat('app.min.js'))
+    .pipe(dest(javaScriptDestination));
+  cb();
+};
+
+exports.default = series(htmlTask, imageTask, javaScriptTask);
